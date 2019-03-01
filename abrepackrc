@@ -1,0 +1,84 @@
+PYTHON=''
+BACKUPNAME=backup
+FILESLIST=files.txt
+HEADERFILE=ab-header.txt
+
+BFILE=${BACKUPNAME}.ab
+TFILE=${BACKUPNAME}.tar
+
+function find_python {
+    for i in 'python' 'python2' 'python2.7'; do
+        tmppython=`which $i 2>/dev/null`
+        #PYTHON=$(( $? == 0 ? $tmppython : '' ))
+        if [[ $? == 0 ]]; then
+            [[ $(check_python_version $tmppython) == 1 ]] && PYTHON=$tmppython && break
+        fi
+    done
+
+    if [[ "$PYTHON" == '' ]]; then
+        echo "Can't find python2"
+        exit 1
+    fi
+}
+
+function check_python_version {
+    python_version=`$1  --version 2>&1 | cut -d' ' -f 2 | grep --color=never -oE '^.'`
+    if [[ $python_version -eq '2' ]]; then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+function search_app {
+    adb shell 'pm list packages -f' | grep --color=never -i "$1" | sed 's/\([^=]\+\)=\([^\r\n]*\)/\2\t\t- \1=\2/g'
+}
+
+function backup_app {
+    adb backup -f $BFILE $1
+    if [[ `stat --printf="%s" $BFILE` -lt 20 ]]; then
+        rm $BFILE
+        echo "There is some error when backup $1 :("
+        exit 1
+    else
+        echo "Backup $1 is done. Backup was saved in $BFILE"
+    fi
+}
+
+function unpack_ab2tar {
+    set -e
+    [ -e $BFILE ] || ( echo "Backupfile isn't exists"; exit 1 )
+
+    find_python
+    tail -c +25 $BFILE | $PYTHON -c "import zlib,sys;sys.stdout.write(zlib.decompress(sys.stdin.read()))" >$TFILE
+    echo "Backup unpacked into $TFILE"
+
+    [ -e $FILESLIST ] && rm $FILESLIST
+    tar tvf $TFILE | grep -oE 'apps\/.*$' > $FILESLIST
+    [[ $? == 0 ]] && echo "Files list was extracted"
+
+    [ -e $HEADERFILE ] && rm $HEADERFILE
+    head -c 24 $BFILE > $HEADERFILE
+    [[ $? == 0 ]] && echo "AB-headers were extracted"
+}
+
+function untar {
+    tar xf $TFILE
+}
+
+function pack_ab {
+    local headers="ANDROID BACKUP\n1\n1\nnone"
+
+    [ -e $HEADERFILE ] && headers=`cat $HEADERFILE`
+    [ -e $FILESLIST ] || (echo "Can't find list of files for pack"; exit 1)
+    # [[ $PYTHON -eq '' ]] && (echo "Can't find python2"; exit 2)
+    find_python
+
+    ( echo -e "$headers" ; tar c --no-recursion -H ustar -T $FILESLIST | \
+        $PYTHON -c "import zlib,sys;sys.stdout.write(zlib.compress(sys.stdin.read(), 9))" ) > ${BACKUPNAME}.mod.ab
+
+    if [[ $? == 0 ]]; then
+        echo "Backup was created. Now use can execute:"
+        echo "    adb restore ${BACKUPNAME}.mod.ab"
+    fi
+}
