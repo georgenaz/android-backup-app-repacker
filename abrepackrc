@@ -9,14 +9,13 @@ TFILE=${BACKUPNAME}.tar
 function find_python {
     for i in 'python' 'python2' 'python2.7'; do
         tmppython=`which $i 2>/dev/null`
-        #PYTHON=$(( $? == 0 ? $tmppython : '' ))
         if [[ $? == 0 ]]; then
             [[ $(check_python_version $tmppython) == 1 ]] && PYTHON=$tmppython && break
         fi
     done
 
     if [[ "$PYTHON" == '' ]]; then
-        echo "Can't find python2"
+        echo "Can't find python 2"
         exit 1
     fi
 }
@@ -71,7 +70,6 @@ function pack_ab {
 
     [ -e $HEADERFILE ] && headers=`cat $HEADERFILE`
     [ -e $FILESLIST ] || (echo "Can't find list of files for pack"; exit 1)
-    # [[ $PYTHON -eq '' ]] && (echo "Can't find python2"; exit 2)
     find_python
 
     ( echo -e "$headers" ; tar c --no-recursion -H ustar -T $FILESLIST | \

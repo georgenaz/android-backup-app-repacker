@@ -35,14 +35,10 @@ case "$1" in
         ;;
     'clear')
         [ -d apps ] && rm -rf apps
-        [ -e $FILESLIST ] && rm $FILESLIST
-        [ -e $HEADERFILE ] && rm $HEADERFILE
-        [ -e $BFILE ] && rm $BFILE
-        [ -e $TFILE ] && rm $TFILE
+        for i in $FILESLIST $HEADERFILE $BFILE $TFILE; do
+            [ -e $i ] && echo "..deleting $i" && rm $i
+        done
         echo 'Cleared'
-        ;;
-    'param2')
-        echo 'param2'
         ;;
     *)
         echo -e "$usage_message"
