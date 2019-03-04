@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+#   Android backup repacker
+#   Shell script for make backups with `adb backup`, unpack and repack them
+#   @author: george.naz
 
 source "$(dirname $0)/abrepackrc"
 

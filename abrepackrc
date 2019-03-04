@@ -1,3 +1,7 @@
+#
+#   Source file for android backup repacker
+#   @author: george.naz
+
 PYTHON=''
 BACKUPNAME=backup
 FILESLIST=files.txt
