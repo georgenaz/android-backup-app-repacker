@@ -56,4 +56,4 @@ For android 4.4 (tested at one device) works only restore repacked backups. `adb
 
 #### Thanks
 - https://android.googlesource.com/platform/frameworks/base/+/4a627c71ff53a4fca1f961f4b1dcc0461df18a06
-- nelenkov for https://github.com/nelenkov/android-backup-extractor
+- Nikolay Elenkov for https://github.com/nelenkov/android-backup-extractor
