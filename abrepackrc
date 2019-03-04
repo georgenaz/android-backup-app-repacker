@@ -46,7 +46,7 @@ function backup_app {
 
 function unpack_ab2tar {
     set -e
-    [ -e $BFILE ] || ( echo "Backupfile isn't exists"; exit 1 )
+    [ -e $BFILE ] || ( echo "Backupfile doesn't exist"; exit 1 )
 
     find_python
     tail -c +25 $BFILE | $PYTHON -c "import zlib,sys;sys.stdout.write(zlib.decompress(sys.stdin.read()))" >$TFILE
