@@ -1,5 +1,5 @@
 # Android backup repacker
-Utility (shell-script) to search and get application from device, extract and repack Android backups created with adb backup.
+Utility (shell-script) to search and get (backup) application from device, extract and repack Android backups created with adb backup.
 
 ## Requeriments
 - bash
