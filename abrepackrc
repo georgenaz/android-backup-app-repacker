@@ -25,7 +25,7 @@ function find_python {
 }
 
 function check_python_version {
-    python_version=`$1  --version 2>&1 | cut -d' ' -f 2 | grep --color=never -oE '^.'`
+    python_version=`$1  --version 2>&1 | cut -d' ' -f 2 | grep --color=never -oE '^.' | head -n 1`
     if [[ $python_version -eq '2' ]]; then
         echo 1
     else
