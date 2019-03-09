@@ -39,7 +39,7 @@ case "$1" in
         ;;
     'clear')
         [ -d apps ] && rm -rf apps
-        for i in $FILESLIST $HEADERFILE $BFILE $TFILE; do
+        for i in $FILESLIST $FILEMTREE $HEADERFILE $BFILE $TFILE; do
             [ -e $i ] && echo "..deleting $i" && rm $i
         done
         echo 'Cleared'

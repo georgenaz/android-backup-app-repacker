@@ -5,6 +5,7 @@
 PYTHON=''
 BACKUPNAME=backup
 FILESLIST=files.txt
+FILEMTREE=files.mtree
 HEADERFILE=ab-header.txt
 
 BFILE=${BACKUPNAME}.ab
@@ -34,12 +35,12 @@ function check_python_version {
 }
 
 function search_app {
-    adb shell 'pm list packages -f' | grep --color=never -i "$1" | sed 's/\([^=]\+\)=\([^\r\n]*\)/\2\t\t- \1=\2/g'
+    adb shell 'pm list packages -f' | grep --color=never -i "$1" | sed -E "s/(.+)=([^=]+)(\r|\n|^M)*$/\2		- \1=\2/g"
 }
 
 function backup_app {
     adb backup -f $BFILE $1
-    if [[ `stat --printf="%s" $BFILE` -lt 20 ]]; then
+    if [[ `stat -f '%z' $BFILE` -lt 1024 ]]; then
         rm $BFILE
         echo "There is some error when backup $1 :("
         exit 1
@@ -58,6 +59,8 @@ function unpack_ab2tar {
 
     [ -e $FILESLIST ] && rm $FILESLIST
     tar tvf $TFILE | grep -oE 'apps\/.*$' > $FILESLIST
+    echo "#mtree" > $FILEMTREE
+    tar tvf $TFILE | sed -E 's/^(.)[^ ]+ +[0-9]+ +([0-9]+) +([0-9]+).+ apps\/(.+)(\r|\n)*$/apps\/\4 uid=\2 gid=\3 type=\1/' | sed 's/type=d/type=dir/' | sed 's/type=-/type=file/' >> $FILEMTREE
     [[ $? == 0 ]] && echo "Files list was extracted"
 
     [ -e $HEADERFILE ] && rm $HEADERFILE
@@ -66,7 +69,7 @@ function unpack_ab2tar {
 }
 
 function untar {
-    tar xf $TFILE
+    tar xf $TFILE --preserve-permissions
 }
 
 function pack_ab {
@@ -76,7 +79,7 @@ function pack_ab {
     [ -e $FILESLIST ] || (echo "Can't find list of files for pack"; exit 1)
     find_python
 
-    ( echo -e "$headers" ; tar c --no-recursion -H ustar -T $FILESLIST | \
+    ( echo -e "$headers" ; tar c --no-recursion --format ustar @$FILEMTREE | \
         $PYTHON -c "import zlib,sys;sys.stdout.write(zlib.compress(sys.stdin.read(), 9))" ) > ${BACKUPNAME}.mod.ab
 
     if [[ $? == 0 ]]; then
