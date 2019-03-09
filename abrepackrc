@@ -60,7 +60,7 @@ function unpack_ab2tar {
     [ -e $FILESLIST ] && rm $FILESLIST
     tar tvf $TFILE | grep -oE 'apps\/.*$' > $FILESLIST
     echo "#mtree" > $FILEMTREE
-    tar tvf $TFILE | sed -E 's/^(.)[^ ]+ +[0-9]+ +([0-9]+) +([0-9]+).+ apps\/(.+)(\r|\n)*$/apps\/\4 uid=\2 gid=\3 type=\1/' | sed 's/type=d/type=dir/' | sed 's/type=-/type=file/' >> $FILEMTREE
+    tar tvf $TFILE | sed -E 's/^(.)[^ ]+ +[0-9]+ +([0-9]+) +([0-9]+).+ apps\/(.+)(\r|\n)*$/apps\/\4 uid=\2 gid=\3 type=\1/' | sed 's/type=d/type=dir/' | sed 's/type=-/type=file/' | sed -E 's/ ([^ ]+ uid=)/\\s\1/' >> $FILEMTREE
     [[ $? == 0 ]] && echo "Files list was extracted"
 
     [ -e $HEADERFILE ] && rm $HEADERFILE
