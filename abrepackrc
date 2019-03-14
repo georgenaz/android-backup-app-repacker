@@ -35,7 +35,7 @@ function check_python_version {
 }
 
 function search_app {
-    adb shell 'pm list packages -f' | grep --color=never -i "$1" | sed -E "s/(.+)=([^=]+)(\r|\n|^M)*$/\2		- \1=\2/g"
+    adb shell 'pm list packages -f' | grep --color=never -i "$1" | sed -E "s/(.+)=([^=]+)(\r|\n|)*$/\2		- \1=\2/g"
 }
 
 function backup_app {
